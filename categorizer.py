@@ -1,11 +1,3 @@
-import pandas as pd
-
-df = pd.read_csv('test.csv')
-
-df.columns = df.columns.str.strip()
-df['Debit Amount'] = df['Debit Amount'].replace(',', '', regex=True)
-df['Debit Amount'] = pd.to_numeric(df['Debit Amount'], errors='coerce')
-
 # Lowercase all keywords upfront
 groc = ["tesco", "aldi", "lidl", "lituanica", "dunnes", "express", "supervalu"]
 services = ["google", "spotify", "netflix", "ring"]
@@ -60,4 +52,3 @@ df['Date'] = pd.to_datetime(df['Posted Transactions Date'])  # ensure proper dat
 df['Month'] = df['Date'].dt.to_period('M')
 
 monthly_summary = df.groupby(['Month', 'Category'])['Debit Amount'].sum().unstack().fillna(0)
-print(monthly_summary)
