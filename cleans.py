@@ -1,10 +1,6 @@
 import pandas as pd
-from categorizer import categorize
 
-def load_and_clean_data(df):
-
-    # Import files
-    df.columns = df.columns.str.strip()
+def clean_dataset_otherwise(df):
 
     # Ensure necessary columns exist
     required_columns = ['Description1', 'Debit Amount', 'Credit Amount', 'Posted Currency', 'Transaction Type', 'Posted Transactions Date']
@@ -19,22 +15,20 @@ def load_and_clean_data(df):
     # Handle missing values
     df.dropna(subset=['Description1'], inplace=True)  # Drop rows with missing descriptions
 
+    # Fill missing numerical values with 0 for debit and credit amounts
+    df['Debit Amount'].fillna(0, inplace=True)
+    df['Credit Amount'].fillna(0, inplace=True)
+
+    # Ensure 'Debit Amount' and 'Credit Amount' are numeric
     df['Debit Amount'] = pd.to_numeric(df['Debit Amount'], errors='coerce').fillna(0)
     df['Credit Amount'] = pd.to_numeric(df['Credit Amount'], errors='coerce').fillna(0)
 
-    # Convert 'Transaction Type' and 'Posted Currency' to categorical types
+    # Optionally, convert 'Transaction Type' and 'Posted Currency' to categorical types
     df['Transaction Type'] = df['Transaction Type'].astype('category')
     df['Posted Currency'] = df['Posted Currency'].astype('category')
-    
-    # Convert 'Posted Transactions Date' to usable date
-    df['Date'] = pd.to_datetime(df['Posted Transactions Date'], format='%d/%m/%Y', errors='coerce', dayfirst=True)
 
-    df["Label"] = df["Description1"].astype(str).apply(categorize)
+    # We also need a date to predict future spending
+    df['Posted Transactions Date'] = pd.to_datetime(df['Posted Transactions Date'])
 
-    df[["Description1", "Label", "Debit Amount"]].to_csv("test2.csv", index=False)
-
+    # Save cleaned data
     return df
-
-def filter_by_date(df, start_date, end_date):
-    mask = (df['Date'] >= pd.to_datetime(start_date)) & (df['Date'] <= pd.to_datetime(end_date))
-    return df.loc[mask]

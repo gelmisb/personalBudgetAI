@@ -1,50 +1,60 @@
-import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.naive_bayes import MultinomialNB
-from sklearn.metrics import classification_report, accuracy_score, precision_score, recall_score, f1_score
-import xgboost as xgb
+from sklearn.preprocessing import LabelEncoder
+from sklearn.metrics import classification_report
+from sklearn.neural_network import MLPClassifier
+import pandas as pd
 
-df = pd.read_csv('test2_good.csv')
 
-# Clean any missing data
-df.dropna(subset=['Description1', 'Label'], inplace=True)
+def predict_categories_and_generate_report(df):
 
-# Split the data 
-X = df['Description1']  # The transaction descriptions
-y = df['Label']         # The labels (categories)
+    # Ensure required columns exist
+    required_columns = {"Description1", "Label"}
+    if not required_columns.issubset(df.columns):
+        raise ValueError(f"CSV must contain the following columns: {required_columns}")
 
-# Initialize TF-IDF vectorizer
-vectorizer = TfidfVectorizer(stop_words='english')
+    # Drop missing or malformed rows
+    df.dropna(subset=["Description1", "Label"], inplace=True)
 
-# Fit and transform the descriptions into a document-term matrix
-X_tfidf = vectorizer.fit_transform(X)
+    # Optional: remove empty or whitespace-only descriptions
+    df = df[df["Description1"].str.strip() != ""]
 
-# Split the data into training and test sets
-X_train, X_test, y_train, y_test = train_test_split(X_tfidf, y, test_size=0.2, random_state=42)
+    # Otherwise continue as usual
+    df.dropna(subset=['Description1', 'Label'], inplace=True)
+    
+    X = df['Description1']
+    y = df['Label']
 
-# Initialize Naive Bayes classifier
-model = MultinomialNB()
+    label_encoder = LabelEncoder()
+    y_encoded = label_encoder.fit_transform(y)
 
-# Train the model
-model.fit(X_train, y_train)
+    vectorizer = TfidfVectorizer(stop_words='english')
+    X_tfidf = vectorizer.fit_transform(X)
 
-# Predict the categories for the test set
-y_pred = model.predict(X_test)
+    X_train, X_test, y_train, y_test = train_test_split(X_tfidf, y_encoded, test_size=0.2, random_state=42)
 
-# Evaluate the model
-print("Classification Report:\n", classification_report(y_test, y_pred, zero_division=1))
+    model = MLPClassifier(hidden_layer_sizes=(100, 50), max_iter=500, random_state=42)
+    model.fit(X_train, y_train)
 
-# Example: predicting a new transaction description
-new_transaction = ["Bought groceries at Tesco"]
-new_tfidf = vectorizer.transform(new_transaction)
-prediction = model.predict(new_tfidf)
+    y_pred = model.predict(X_test)
 
-# Display the prediction for the new transaction
-print(f"Predicted Category: {prediction[0]}\n\n")
+    report = classification_report(
+        y_test,
+        y_pred,
+        labels=list(range(len(label_encoder.classes_))),
+        target_names=label_encoder.classes_,
+        zero_division=1
+    )
 
-# Calculate and print additional metrics for the test set
-print("Accuracy:", accuracy_score(y_test, y_pred))
-print("Precision:", precision_score(y_test, y_pred, average='weighted', zero_division=1))
-print("Recall:", recall_score(y_test, y_pred, average='weighted', zero_division=1))
-print("F1-Score:", f1_score(y_test, y_pred, average='weighted', zero_division=1))
+    # Predict the label of a sample transaction
+    new_transaction = ["Bought groceries at Tesco"]
+    new_tfidf = vectorizer.transform(new_transaction)
+    prediction = model.predict(new_tfidf)
+    prediction_string = f"{label_encoder.inverse_transform(prediction)[0]}"
+
+    # Optional: add predictions to a copy of the original df
+    labeled_df = df.copy()
+    labeled_df["Predicted Label"] = label_encoder.inverse_transform(model.predict(X_tfidf))
+    
+
+    return labeled_df, report, prediction_string

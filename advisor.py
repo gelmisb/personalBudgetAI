@@ -2,7 +2,7 @@ def analyze_budget(df, income):
     advice = []
 
     # Total spend by category
-    category_totals = df.groupby('Category')['Debit Amount'].sum()
+    category_totals = df.groupby('Predicted Label')['Debit Amount'].sum()
 
     # 1. Dining out > 20% of income
     dining_total = category_totals.get('Food & Coffee', 0)
@@ -18,8 +18,10 @@ def analyze_budget(df, income):
         unused = subscriptions.groupby('Description1')['Debit Amount'].count().reset_index()
         unused = unused[unused['Debit Amount'] <= 1]
         if not unused.empty:
-            advice.append("🔍 Found subscriptions with only 1 recent charge — consider cancelling:\n" +
-                          "\n".join(unused['Description1'].values))
+            advice.append(
+                "🔍 Found subscriptions with only 1 recent charge — consider cancelling:\n" +
+                "\n".join([f"\n  • {desc}" for desc in unused['Description1'].values])
+            )
 
     # 3. Detect fuel costs
     fuel_total = category_totals.get('Fuel', 0)
@@ -43,7 +45,7 @@ def analyze_budget(df, income):
     suspect_merchants = dupes[dupes > 10]
     if not suspect_merchants.empty:
         advice.append("🧐 Multiple frequent transactions from these merchants — double check they're valid:\n" +
-                      "\n".join(suspect_merchants.index[:3]))
+                    "\n".join(f"\n  • " + suspect_merchants.index[:3]))
 
     # 7. What about savings?
     saving_keywords = ['savings', 'deposit']
@@ -58,5 +60,6 @@ def analyze_budget(df, income):
         advice.append(f"💸 You're spending €{total_spend:.2f}, which is more than your income (€{income:.2f}).")
     else:
         advice.append(f"✅ Spending is under control: €{total_spend:.2f} vs income €{income:.2f}.")
+
 
     return advice
