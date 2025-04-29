@@ -1,15 +1,15 @@
-# Lowercase all keywords upfront
-groc = ["tesco", "aldi", "lidl", "lituanica", "dunnes", "express", "supervalu"]
-services = ["google", "spotify", "netflix", "ring"]
-dds = ["pure", "ashbourne", "gym", "virgin media", "panda"]
-miscStores = ["tiger", "choice", "harvey", "red cow tyres", "grafton", "perfectpla", "revive"]
-rent = ["rent"]
-fuel = ["applegreen", "maxol"]
-vapes = ["londis", "vape", "souhans"]
-revolut = ["revolut"]
-foodCoffee = ["costa", "eurolink", "mcdonalds", "jump juice", "central"]
+def categorize(description):   
+ # Lowercase all keywords upfront
+    groc = ["tesco", "aldi", "lidl", "lituanica", "dunnes", "express", "supervalu"]
+    services = ["google", "spotify", "netflix", "ring"]
+    dds = ["pure", "ashbourne", "gym", "virgin media", "panda"]
+    miscStores = ["tiger", "choice", "harvey", "red cow tyres", "grafton", "perfectpla", "revive"]
+    rent = ["rent"]
+    fuel = ["applegreen", "maxol"]
+    vapes = ["londis", "vape", "souhans"]
+    revolut = ["revolut"]
+    foodCoffee = ["costa", "eurolink", "mcdonalds", "jump juice", "central"]
 
-def categorize(description):
     desc = description.lower()
     for x in groc:
         if x in desc:
@@ -40,15 +40,11 @@ def categorize(description):
             return "Food & Coffee"
     return "Other"
 
+    df['Category'] = df['Description1'].apply(categorize)
 
-df['Category'] = df['Description1'].apply(categorize)
+    print(df['Debit Amount'].isna().sum())
 
-# Optional: print result summary
-# print(df.groupby("Category")["Debit Amount"].sum())
-print(df['Debit Amount'].isna().sum())
+    df['Date'] = pd.to_datetime(df['Posted Transactions Date'])  
+    df['Month'] = df['Date'].dt.to_period('M')
 
-
-df['Date'] = pd.to_datetime(df['Posted Transactions Date'])  # ensure proper datetime
-df['Month'] = df['Date'].dt.to_period('M')
-
-monthly_summary = df.groupby(['Month', 'Category'])['Debit Amount'].sum().unstack().fillna(0)
+    monthly_summary = df.groupby(['Month', 'Category'])['Debit Amount'].sum().unstack().fillna(0)

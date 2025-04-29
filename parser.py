@@ -1,7 +1,14 @@
 import pandas as pd
 
-df = pd.read_csv('test.csv')
+def load_and_clean_data(file_path):
+    df = pd.read_csv(file_path)
+    df.columns = df.columns.str.strip()
 
-df.columns = df.columns.str.strip()
-df['Debit Amount'] = df['Debit Amount'].replace(',', '', regex=True)
-df['Debit Amount'] = pd.to_numeric(df['Debit Amount'], errors='coerce')
+    # Clean date
+    df['Date'] = pd.to_datetime(df['Posted Transactions Date'], errors='coerce')
+
+    # Clean amount
+    df['Debit Amount'] = df['Debit Amount'].replace(',', '', regex=True)
+    df['Debit Amount'] = pd.to_numeric(df['Debit Amount'], errors='coerce')
+
+    return df
