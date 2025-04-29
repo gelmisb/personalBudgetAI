@@ -1,6 +1,7 @@
 def categorize(description):   
     desc = description.lower()
 
+    # Ireland based lifestyle 
     categories = {
         "Groceries": ["aldi", "lidl", "tesco", "supervalu", "dunnes", "mr price", "day to day", "penneys", "home bargains"],
         "Fuel": ["applegreen", "maxol", "circle k", "inver", "naas oil", "esso"],
