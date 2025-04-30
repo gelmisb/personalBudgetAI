@@ -28,7 +28,7 @@ def load_and_clean_data(df):
     
     # Convert 'Posted Transactions Date' to usable date
     df['Date'] = pd.to_datetime(df['Posted Transactions Date'], format='%d/%m/%Y', errors='coerce', dayfirst=True)
-
+    
     df["Label"] = df["Description1"].astype(str).apply(categorize)
 
     df[["Description1", "Label", "Debit Amount"]].to_csv("test2.csv", index=False)

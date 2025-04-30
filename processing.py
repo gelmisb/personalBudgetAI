@@ -43,7 +43,7 @@ def predict_categories_and_generate_report(df):
         y_pred,
         labels=list(range(len(label_encoder.classes_))),
         target_names=label_encoder.classes_,
-        zero_division=1
+        zero_division=1, output_dict=True
     )
 
     # Predict the label of a sample transaction
@@ -56,5 +56,6 @@ def predict_categories_and_generate_report(df):
     labeled_df = df.copy()
     labeled_df["Predicted Label"] = label_encoder.inverse_transform(model.predict(X_tfidf))
     
+    report_df = pd.DataFrame(report).transpose()
 
-    return labeled_df, report, prediction_string
+    return labeled_df, report_df, prediction_string

@@ -15,17 +15,13 @@ def categorize(description):
         "Transfers": ["revolut", "transfer", "*mobi", "xfr", "*inet", "neringa"],
         "Pets": ["pet", "zoo", "petstop", "pets at home", "petmania"],
         "Entertainment": ["cinema", "odeon", "mondello", "tickets", "park", "tibradde", "regatta", "weev", "special", "whiteriver", "hobby", "sugarloaf", "fressnapf", "courtlough", "raw elements", "wicklow"],
-        "Rent": ["rent"],
         "Pharmacy/Health": ["pharma", "chemist", "lifephar", "holland and barrett", "clinic", "conor", "maple", "revive"],
         "Bars & Alcohol": ["bar", "off licence", "brewery", "pub", "club", "fosters"],
         "Gifts & Misc": ["tiger", "perfume", "flowers", "gift", "souvenir", "smith's", "choice", "eason", "ups"],
         "Transport & Car": ["ncts", "car", "garage", "tyres", "autocare", "motor", "chargepoint", "ionity", "motor tax", "eflow", "asap", "chill", "smartpart", "m3", "m11", "northlink"],
-        "Accommodation": ["hotel", "b&b"],
-        "Savings": ["savings"],
-        "Withdrawal": ["atm", "point cash", "withdrawal", "the square"],
+        "Accommodation": ["hotel", "b&b", "home heat", "electric ireland"],
+        "Withdrawal": ["atm", "point cash", "withdrawal", "the square", "rent"],
         "Fishing": ["sportfins", "southside angl"],
-        "Electricity": ["electric ireland"],
-        "Heating (Oil)": ["home heat"], 
         "Small shops": ["day to day", "tom", "centra", "dealz", "crazy", "jl grocery", "glenbeigh", "spar", "clonee", "balbriggan", "selecta", "o shaughnessy", "fitzgerald", "fontique", "sheehans", "melo", "maunsells", "ballycommon", "rathnew"]
     }
 
@@ -33,15 +29,3 @@ def categorize(description):
         if any(keyword in description for keyword in keywords):
             return category
     return "Uncategorized"
-
-# df = load_and_clean_data('test1.csv')
-# print("Columns in CSV:", df.columns.tolist())
-
-# df["Label"] = df["Description1"].astype(str).apply(categorize)
-
-# df['Debit Amount'] = df['Debit Amount'].replace(',', '', regex=True)
-# df['Debit Amount'] = pd.to_numeric(df['Debit Amount'], errors='coerce')
-
-# df[["Description1", "Label", "Debit Amount"]].to_csv("test2.csv", index=False)
-
-# print("✅ Labeled transactions saved to 'test2.csv'")

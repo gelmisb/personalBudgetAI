@@ -17,11 +17,11 @@ def analyze_budget(df, income):
     else:
         unused = subscriptions.groupby('Description1')['Debit Amount'].count().reset_index()
         unused = unused[unused['Debit Amount'] <= 1]
-        if not unused.empty:
-            advice.append(
-                "🔍 Found subscriptions with only 1 recent charge — consider cancelling:\n" +
-                "\n".join([f"\n  • {desc}" for desc in unused['Description1'].values])
-            )
+
+    # Extract simplified names
+    simplified_names = subscriptions['Description1'].str.extract(r'(?i)(netflix|spotify|amazon prime|openai|chill insurance)', expand=False)
+    clean_names = simplified_names.dropna().unique()
+    advice.append("🔍 Found subscriptions worth consider cancelling:\n" + ", ".join(clean_names))
 
     # 3. Detect fuel costs
     fuel_total = category_totals.get('Fuel', 0)
@@ -43,9 +43,13 @@ def analyze_budget(df, income):
     # 6.Check for other or unusual shops
     dupes = df['Description1'].value_counts()
     suspect_merchants = dupes[dupes > 10]
-    if not suspect_merchants.empty:
-        advice.append("🧐 Multiple frequent transactions from these merchants — double check they're valid:\n" +
-                    "\n".join(f"\n  • " + suspect_merchants.index[:3]))
+
+    if suspect_merchants.empty:
+        advice.append("✅ No unusual shops detected.")
+    else:
+        simplified_names_shops = subscriptions['Description1'].str.extract(r'(?i)(amazon|amzn|ebay|ikea|harvey norman|deciem|home store|woodies|pepco|h&m|zara|paypal|belles|smyths|blanchardst|halfords|local|adverts|doyles|blanch|organised|liffey|the range|holland|pull and bear|boots|nutbutter|dbrand|heatons|navan|haggard|perfectpla|bulbs direct|yeti|tenoo)', expand=False)
+        clean_names_shops = simplified_names_shops.dropna().unique()
+        advice.append("🧐 Multiple frequent transactions from these merchants — double check they're valid:\n" + ", ".join(clean_names_shops))
 
     # 7. What about savings?
     saving_keywords = ['savings', 'deposit']
@@ -53,13 +57,11 @@ def analyze_budget(df, income):
     if savings.empty:
         advice.append("💰 No savings activity found. Consider setting aside at least 10% monthly.")
 
-
     # High spending overall
     total_spend = df['Debit Amount'].sum()
     if total_spend > income:
         advice.append(f"💸 You're spending €{total_spend:.2f}, which is more than your income (€{income:.2f}).")
     else:
         advice.append(f"✅ Spending is under control: €{total_spend:.2f} vs income €{income:.2f}.")
-
 
     return advice
